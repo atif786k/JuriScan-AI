@@ -1,0 +1,139 @@
+body{
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+/* From Uiverse.io by gharsh11032000 */
+.button {
+  cursor: pointer;
+  position: relative;
+  padding: 10px 24px;
+  font-size: 18px;
+  color: black;
+  border: 2px solid black;
+  border-radius: 34px;
+  background-color: hsl(24, 95%, 58%);
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  overflow: hidden;
+}
+
+.button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 60px;
+  height: 60px;
+  border-radius: inherit;
+  scale: 0;
+  z-index: -1;
+  background-color: black;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.button:hover::before {
+  scale: 3;
+}
+
+.button:hover {
+  color: white;
+  scale: 1.1;
+  box-shadow: 0 0px 20px hsl(24, 95%, 58%);
+}
+
+.button:active {
+  scale: 1;
+}
+
+/* From Uiverse.io by dylanharriscameron */
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7f8;
+  box-shadow: 10px 10px 40px rgba(0, 0, 0, 0.05),
+    -10px -10px 40px rgba(255, 255, 255, 0.8);
+  padding: 1.5rem;
+  margin: 9rem auto 5rem;
+  z-index: 1;
+}
+
+.bg {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 1rem;
+  width: 100%;
+  height: auto;
+  padding: 2rem;
+  outline: 2px solid white;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.03);
+}
+
+.blob {
+  position: absolute;
+  z-index: 0;
+  top: -40px;
+  left: -40px;
+  width: 400px;
+  height: 400px;
+  background-color: #fa812f; /* Tailwind's rose-600 */
+  filter: blur(30px);
+  animation: blob-bounce 12s ease-in-out infinite;
+}
+
+/* @keyframes blob-bounce {
+  0% {
+    transform: translate(-40px, -40px);
+  }
+  25% {
+    transform: translate(1000px, -40px);
+  }
+  50% {
+    transform: translate(1000px, 1000px);
+  }
+  75% {
+    transform: translate(-40px, 1000px);
+  }
+  100% {
+    transform: translate(-40px, -40px);
+  }
+} */
+
+.blob2 {
+  position: absolute;
+  z-index: 0;
+  bottom: -40px;
+  right: -40px;
+  width: 400px;
+  height: 400px;
+  background-color: #fa812f; /* Tailwind's rose-600 */
+  filter: blur(30px);
+  animation: blob-bounce2 12s ease-in-out infinite;
+}
+
+/* @keyframes blob-bounce2 {
+  0% {
+    transform: translate(-40px, -40px);
+  }
+  25% {
+    transform: translate(-1000px, -40px);
+  }
+  50% {
+    transform: translate(-1000px, -1000px);
+  }
+  75% {
+    transform: translate(-40px, -1000px);
+  }
+  100% {
+    transform: translate(-40px, -40px);
+  }
+} */
