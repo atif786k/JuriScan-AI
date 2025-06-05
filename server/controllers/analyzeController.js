@@ -1,3 +1,4 @@
+const fs = require("fs");
 const { getPDFAnalysis } = require("../services/aiService");
 const { extractTextFromPDF } = require("../services/pdfService");
 
