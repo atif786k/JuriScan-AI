@@ -6,7 +6,7 @@ import {
   MdFileUpload,
 } from "react-icons/md";
 import { RiArrowRightUpFill } from "react-icons/ri";
-import FileUpload from "../components/fileUpload";
+import FileUpload from "../components/FileUpload";
 import ReactMarkdown from "react-markdown";
 import jspdf from "jspdf";
 import html2canvas from "html2canvas";

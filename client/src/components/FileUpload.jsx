@@ -27,7 +27,7 @@ const FileUpload = ({ closeCard, onSummaryGenerated }) => {
     const formData = new FormData();
     formData.append("pdf", selectedFile);
     try {
-      const response = await fetch("http://localhost:5000/api/analyze-pdf", {
+      const response = await fetch("https://juriscan-api.up.railway.app/api/analyze-pdf", {
         method: "POST",
         body: formData,
       });
