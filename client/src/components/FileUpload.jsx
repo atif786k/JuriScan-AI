@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { RiCloseLargeLine } from "react-icons/ri";
 
