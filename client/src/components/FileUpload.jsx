@@ -1,105 +1,131 @@
-import { useRef, useState } from "react";
-import { IoCloudUploadOutline } from "react-icons/io5";
-import { RiCloseLargeLine } from "react-icons/ri";
+import { useState } from "react";
+import { MdFileUpload } from "react-icons/md";
+import { IoClose } from "react-icons/io5";
 
 const FileUpload = ({ closeCard, onSummaryGenerated }) => {
-  const fileInputRef = useRef(null);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleBrowseClick = () => {
-    fileInputRef.current.click();
-  };
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      // Check file type
+      const allowedTypes = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+      ];
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
+      if (!allowedTypes.includes(selectedFile.type)) {
+        setError("Please upload a PDF or DOCX file");
+        return;
+      }
+
+      // Check file size (10MB limit)
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        setError("File size should be less than 10MB");
+        return;
+      }
+
+      setFile(selectedFile);
+      setError("");
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) {
-      alert("Please upload a document first.");
+  const handleUpload = async () => {
+    if (!file) {
+      setError("Please select a file first");
       return;
     }
+
     setLoading(true);
     const formData = new FormData();
-    formData.append("pdf", selectedFile);
+    formData.append("pdf", file);
+
     try {
-      const response = await fetch("https://juriscan-ai.up.railway.app/api/analyze-pdf", {
+      const response = await fetch("http://localhost:5000/api/analyze-pdf", {
         method: "POST",
         body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze document");
+      }
+
       const data = await response.json();
       if (data.success) {
         onSummaryGenerated(data.data);
         closeCard();
       } else {
-        console.error("Failed to analyze PDF");
+        setError(data.message || "Failed to analyze document");
       }
-    } catch (error) {
-      console.error("Server error occurred: ", error.message);
+    } catch (err) {
+      setError(err.message || "Failed to analyze document");
     } finally {
       setLoading(false);
     }
   };
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-gray-100 rounded-lg shadow-lg p-8 w-full max-w-xl relative space-y-6">
-        <RiCloseLargeLine
-          onClick={closeCard}
-          className="absolute right-8 top-8 text-xl cursor-pointer"
-        />
-        <h2 className="text-2xl font-bold text-center">FILE UPLOAD</h2>
 
-        <div className="border-2 border-dashed border-gray-400 rounded-lg p-10 text-center">
-          <input
-            type="file"
-            accept=".pdf, .docx"
-            onChange={handleFileChange}
-            ref={fileInputRef}
-            className="hidden"
-          />
-          <IoCloudUploadOutline className="w-14 h-14 mx-auto mb-4" />
-          <p className="font-medium">Drag & Drop your file(s) here</p>
-          <p className="text-gray-500">or</p>
-          <button
-            onClick={handleBrowseClick}
-            className="mt-2 px-4 py-2 bg-black text-white rounded"
-          >
-            Browse files
-          </button>
-        </div>
-        {selectedFile && (
-          <p className="text-md text-gray-700 font-medium">
-            Selected File:{" "}
-            <span className="text-black">{selectedFile.name}</span>
-          </p>
-        )}
-        {loading && (
-          <p className="text-green-600 text-[18px] leading-[18px]">
-            Hold on tight. It might take few of your seconds 😉
-          </p>
-        )}
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto my-auto transform -translate-y-0">
         <button
-          onClick={handleAnalyze}
-          disabled={!selectedFile}
-          className={`w-full rounded flex justify-center transition ${
-            selectedFile
-              ? "bg-black text-white hover:bg-gray-800"
-              : "bg-gray-300 text-gray-600 cursor-not-allowed"
-          } ${loading ? "py-0" : "py-3"}`}
+          onClick={closeCard}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
-          {loading ? (
-            <img
-              src="/loading-spinner.gif"
-              width="90px"
-              alt="Analyzing document"
-            />
-          ) : (
-            "Analyze"
-          )}
+          <IoClose className="text-2xl" />
+        </button>
+
+        <h2 className="text-2xl font-semibold mb-4">Upload Document</h2>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Select a PDF or DOCX file
+          </label>
+          <div className="flex items-center justify-center w-full">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <MdFileUpload className="text-3xl text-[#FA812F] mb-2" />
+                <p className="mb-2 text-sm text-gray-500">
+                  <span className="font-semibold">Click to upload</span> or drag
+                  and drop
+                </p>
+                <p className="text-xs text-gray-500">PDF or DOCX (MAX. 10MB)</p>
+              </div>
+              <input
+                type="file"
+                className="hidden"
+                accept=".pdf,.docx"
+                onChange={handleFileChange}
+              />
+            </label>
+          </div>
+        </div>
+
+        {file && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-700">
+              Selected file: <span className="font-medium">{file.name}</span>
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handleUpload}
+          disabled={loading || !file}
+          className={`w-full py-2 px-4 rounded-md text-white font-medium ${
+            loading || !file
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#FA812F] hover:bg-[#e6731f]"
+          }`}
+        >
+          {loading ? "Analyzing..." : "Analyze Document"}
         </button>
       </div>
     </div>

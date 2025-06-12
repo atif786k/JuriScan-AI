@@ -1,15 +1,108 @@
-import React from 'react'
+import { useRef, useState } from "react";
+import { IoCopy, IoCopyOutline } from "react-icons/io5";
+import { MdFileDownload, MdFileDownloadDone } from "react-icons/md";
+import ReactMarkdown from "react-markdown";
+import jspdf from "jspdf";
+import html2canvas from "html2canvas";
 
-const SummaryPage = () => {
+const SummaryPage = ({ summary }) => {
+  const [copied, setCopied] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
+  const summaryRef = useRef(null);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy text: ", error);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!summaryRef.current) return;
+
+    try {
+      const canvas = await html2canvas(summaryRef.current, {
+        scale: 2,
+        useCORS: true,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jspdf({
+        orientation: "p",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const marginX = 10; // left & right margin
+      const marginY = 20; // top & bottom margin
+
+      const usableWidth = pageWidth - 2 * marginX;
+      const usableHeight = pageHeight - 2 * marginY;
+
+      const imgProps = {
+        width: canvas.width,
+        height: canvas.height,
+      };
+
+      const aspectRatio = imgProps.height / imgProps.width;
+      const renderWidth = usableWidth;
+      const renderHeight = usableWidth * aspectRatio;
+
+      // Ensure it doesn't exceed usable height
+      const finalHeight = renderHeight > usableHeight ? usableHeight : renderHeight;
+
+      pdf.addImage(imgData, "PNG", marginX, marginY, renderWidth, finalHeight);
+
+      pdf.save("Analyzed_Document.pdf");
+      setDownloaded(true);
+      setTimeout(() => setDownloaded(false), 2000);
+    } catch (error) {
+      console.error("PDF download failed:", error.message);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto text-left bg-white p-6 rounded-lg shadow">
-      <h3 className="text-2xl font-semibold mb-4">Summary</h3>
-      <p className="text-gray-700 leading-relaxed">
-        {/* Example summary content */}
-        This document outlines the key responsibilities of both parties involved in the contract, focusing on deliverables, timelines, and confidentiality. Legal obligations and termination clauses are clearly defined to prevent ambiguity.
-        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Consectetur tempora natus quasi asperiores assumenda, iste consequatur architecto sit officia vero accusamus, at officiis vel eos earum excepturi eum! Dolor minima, quibusdam enim corporis ullam sunt. Blanditiis, vel. Molestiae consequatur obcaecati, ex optio rem fugiat sequi placeat recusandae molestias illum earum.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias libero dolore placeat neque tenetur omnis! Tempore ut autem, minima sint quas ab velit ad, cupiditate sunt obcaecati, molestias quaerat corrupti nobis asperiores culpa. Ipsum ratione voluptatem minus architecto vel, explicabo labore quo laboriosam? Ullam neque eum alias totam hic illo voluptas nostrum molestias rem. Perferendis voluptatibus nam velit non provident reprehenderit ipsam amet fuga numquam, libero dolorem labore totam quis iste in placeat quo aliquid explicabo. Aliquam, et pariatur dignissimos amet sed voluptatibus nostrum aliquid sapiente dolore ipsum in harum expedita. Et accusantium beatae necessitatibus adipisci in magni cum esse quia eius ad iure placeat doloremque quis laudantium eos optio aliquam incidunt consectetur totam, nobis nesciunt illum. Vero voluptatum quam ipsum odio saepe. Libero dolore quaerat culpa repellat vero ipsam minima perspiciatis nesciunt molestiae a sunt hic non, eaque totam quisquam, autem soluta similique facilis eius iure debitis molestias quasi obcaecati aliquam? Magni sit neque saepe officia dignissimos modi reprehenderit aspernatur minima laborum sequi et, architecto accusamus cupiditate itaque iste, fuga enim voluptates tenetur natus, necessitatibus culpa optio nam. Nulla ratione, est assumenda iste soluta alias, iure nam animi provident nemo praesentium, eius nihil exercitationem mollitia vitae tenetur ea voluptas!
-      </p>
+    <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-2xl font-semibold text-gray-900">Document Analysis</h3>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handleCopy}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title="Copy to clipboard"
+          >
+            {copied ? (
+              <IoCopy className="text-2xl text-[#FA812F]" />
+            ) : (
+              <IoCopyOutline className="text-2xl text-gray-600" />
+            )}
+          </button>
+          <button
+            onClick={handleDownload}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title="Download as PDF"
+          >
+            {downloaded ? (
+              <MdFileDownloadDone className="text-2xl text-[#FA812F]" />
+            ) : (
+              <MdFileDownload className="text-2xl text-gray-600" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={summaryRef}
+        className="prose prose-sm sm:prose-base w-full max-w-none leading-relaxed"
+      >
+        <ReactMarkdown>{summary}</ReactMarkdown>
+      </div>
     </div>
   );
 };
